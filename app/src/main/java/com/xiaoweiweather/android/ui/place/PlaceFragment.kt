@@ -22,47 +22,48 @@ class PlaceFragment:Fragment() {
     val viewModel by lazy { ViewModelProviders.of(this).get(PlaceViewModel::class.java) }
 
     private lateinit var adapter: PlaceAdapter
-
+    //加载布局
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_place,container,false)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        //获得实例
         val rV=view?.findViewById<RecyclerView>(R.id.recyclerView)
         val bIV=view?.findViewById<ImageView>(R.id.bgImageView)
         val sPE=view?.findViewById<EditText>(R.id.searchPlaceEdit)
+        //设置了LayoutManager和适配器
         val layoutManager=LinearLayoutManager(activity)
         rV?.layoutManager=layoutManager
         adapter= PlaceAdapter(this,viewModel.placeList)
         rV?.adapter=adapter
+        //监听内容变化
         sPE?.addTextChangedListener{editable->
             val content=editable.toString()
+            //有内容
             if(content.isNotEmpty()){
-                viewModel.searchPlaces(content)
+                viewModel.searchPlaces(content) //发起搜索
             }else{
-                rV?.visibility=View.GONE
-                bIV?.visibility=View.VISIBLE
-                viewModel.placeList.clear()
-                adapter.notifyDataSetChanged()
+                rV?.visibility=View.GONE    //隐藏显示
+                bIV?.visibility=View.VISIBLE    //展示背景图
+                viewModel.placeList.clear() //清空数据源保存的地点
+                adapter.notifyDataSetChanged()  //重绘当前可见区域
             }
         }
         viewModel.placeLiveData.observe(this, Observer { result->
             val places=result.getOrNull()
             if(places!=null){
-                rV?.visibility=View.VISIBLE
-                bIV?.visibility=View.GONE
+                rV?.visibility=View.VISIBLE //展示显示
+                bIV?.visibility=View.GONE   //隐藏背景图
                 viewModel.placeList.clear()
                 viewModel.placeList.addAll(places)
                 adapter.notifyDataSetChanged()
             }else{
-                Toast.makeText(activity,"未能查询到任何地点",Toast.LENGTH_SHORT).show()
-                result.exceptionOrNull()?.printStackTrace()
+                Toast.makeText(activity,"未能查询到任何地点",Toast.LENGTH_SHORT).show()  //异常提示
+                result.exceptionOrNull()?.printStackTrace() //打印异常原因
             }
         })
 
     }
-
-
-
 }

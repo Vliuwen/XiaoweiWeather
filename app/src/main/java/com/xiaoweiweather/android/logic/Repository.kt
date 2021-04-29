@@ -3,12 +3,17 @@ package com.xiaoweiweather.android.logic
 
 import androidx.lifecycle.liveData
 import com.xiaoweiweather.android.logic.model.Place
+import com.xiaoweiweather.android.logic.model.Weather
 import com.xiaoweiweather.android.logic.network.XiaoweiWeatherNetwork
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import java.lang.Exception
 import java.lang.RuntimeException
+import kotlin.coroutines.CoroutineContext
 
 object Repository {
+
     fun searchPlaces(query:String)= liveData(Dispatchers.IO) {
         val result=try {
             val placeResponse=XiaoweiWeatherNetwork.searchPlaces(query)
@@ -23,4 +28,43 @@ object Repository {
         }
         emit(result)    //发送
     }
+
+    fun refreshWeather(lng:String,lat:String)= fire(Dispatchers.IO) {
+            //协程作用域
+            coroutineScope {
+                //分别获取并响应成功后才会进一步执行
+                val deferredRealtime = async {
+                    XiaoweiWeatherNetwork.getRealtimeWeather(lng, lat)
+                }
+                val deferredDaily=async {
+                    XiaoweiWeatherNetwork.getDailyWeather(lng, lat)
+                }
+                val realtimeResponse=deferredRealtime.await()
+                val dailyResponse=deferredDaily.await()
+                //响应状态都是ok，则将Realtime和Daily对象取出并封装到一个Weather对象中
+                if(realtimeResponse.status=="ok"&&dailyResponse.status=="ok"){
+                    val weather= Weather(realtimeResponse.result.realtime,dailyResponse.result.daily)
+                    Result.success(weather) //包装
+                }else{
+                    //异常处理
+                    Result.failure(
+                            RuntimeException(
+                                "realtime response is ${realtimeResponse.status}"+
+                                "daily response is ${dailyResponse.status}"
+                            )
+                    )
+                }
+            }
+        }
+
+    //提供一个统一的入口函数进行try-catch处理 并发送执行结果
+    private fun<T> fire(context:CoroutineContext,block:suspend ()->Result<T>)= liveData<Result<T>>(context) {
+        val result=try {
+            block()
+        }catch (e:Exception){
+            Result.failure<T>(e)
+        }
+        emit(result)
+    }
+
 }
