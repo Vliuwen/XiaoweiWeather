@@ -29,13 +29,13 @@ class WeatherActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val decorView=window.decorView
-        if (Build.VERSION.SDK_INT >= 21){
+        val decorView = window.decorView
+        if (Build.VERSION.SDK_INT >= 21) {
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
-            window.statusBarColor=Color.TRANSPARENT
+            window.statusBarColor = Color.TRANSPARENT
         }
         setContentView(R.layout.activity_weather)
-        binding=ActivityWeatherBinding.inflate(layoutInflater)
+        binding = ActivityWeatherBinding.inflate(layoutInflater)
         setContentView(binding.root)
         if (viewModel.locationLng.isEmpty()) {
             viewModel.locationLng = intent.getStringExtra("location_lng") ?: ""
@@ -46,16 +46,26 @@ class WeatherActivity : AppCompatActivity() {
         if (viewModel.placeName.isEmpty()) {
             viewModel.placeName = intent.getStringExtra("place_name") ?: ""
         }
-        viewModel.weatherLiveData.observe(this, Observer { result->
-            val weather=result.getOrNull()
-            if(weather!=null){
+        viewModel.weatherLiveData.observe(this, Observer { result ->
+            val weather = result.getOrNull()
+            if (weather != null) {
                 showWeatherInfo(weather)
-            }else{
-                Toast.makeText(this,"无法成功获取天气信息",Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "无法成功获取天气信息", Toast.LENGTH_SHORT).show()
                 result.exceptionOrNull()?.printStackTrace()
             }
+            binding.swipeRefresh.isRefreshing = false
         })
+        binding.swipeRefresh.setColorSchemeResources(R.color.teal_200)
+        refreshWeather()
+        binding.swipeRefresh.setOnRefreshListener {
+            refreshWeather()
+        }
+    }
+
+    fun refreshWeather(){
         viewModel.refreshWeather(viewModel.locationLng,viewModel.locationLat)
+        binding.swipeRefresh.isRefreshing=true
     }
 
     private fun showWeatherInfo(weather: Weather) {
@@ -97,4 +107,4 @@ class WeatherActivity : AppCompatActivity() {
             binding.layoutlifeindex.carWashingText.text = lifeIndex.carWashing[0].desc
             binding.weatherLayout.visibility = View.VISIBLE
         }
-    }
+}
