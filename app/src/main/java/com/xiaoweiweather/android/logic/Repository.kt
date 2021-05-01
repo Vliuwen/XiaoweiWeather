@@ -2,6 +2,7 @@ package com.xiaoweiweather.android.logic
 
 
 import androidx.lifecycle.liveData
+import com.xiaoweiweather.android.logic.dao.PlaceDao
 import com.xiaoweiweather.android.logic.model.Place
 import com.xiaoweiweather.android.logic.model.Weather
 import com.xiaoweiweather.android.logic.network.XiaoweiWeatherNetwork
@@ -66,5 +67,9 @@ object Repository {
         }
         emit(result)
     }
+
+    fun savePlace(place: Place)=PlaceDao.savePlace(place)
+    fun getSavedPlace()=PlaceDao.getSavedPlace()
+    fun isPlaceSaved()=PlaceDao.isPlaceSaved()
 
 }
