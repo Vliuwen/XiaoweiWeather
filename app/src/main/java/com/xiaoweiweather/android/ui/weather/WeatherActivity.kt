@@ -19,6 +19,7 @@ import com.xiaoweiweather.android.R
 import com.xiaoweiweather.android.databinding.*
 import com.xiaoweiweather.android.logic.model.Weather
 import com.xiaoweiweather.android.logic.model.getSky
+import com.xiaoweiweather.android.ui.place.PlaceFragment
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -61,6 +62,27 @@ class WeatherActivity : AppCompatActivity() {
         binding.swipeRefresh.setOnRefreshListener {
             refreshWeather()
         }
+        binding.layoutnow.navBtn.setOnClickListener {
+            binding.drawerLayout.openDrawer(GravityCompat.START)
+            supportFragmentManager.beginTransaction().add(R.id.frameLayout,PlaceFragment()).commit()
+        }
+
+        binding.drawerLayout.addDrawerListener(object :DrawerLayout.DrawerListener{
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+
+            override fun onDrawerOpened(drawerView: View) {}
+
+            override fun onDrawerClosed(drawerView: View) {
+                val manager=getSystemService(Context.INPUT_METHOD_SERVICE)
+                as InputMethodManager
+                manager.hideSoftInputFromWindow(drawerView.windowToken,
+                InputMethodManager.HIDE_NOT_ALWAYS)
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {}
+
+
+        })
     }
 
     fun refreshWeather(){

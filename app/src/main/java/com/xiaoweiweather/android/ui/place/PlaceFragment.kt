@@ -14,11 +14,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.xiaoweiweather.android.MainActivity
 import com.xiaoweiweather.android.R
 import com.xiaoweiweather.android.ui.weather.WeatherActivity
 
 
-class PlaceFragment:Fragment() {
+class PlaceFragment: Fragment() {
 
     val viewModel by lazy { ViewModelProviders.of(this).get(PlaceViewModel::class.java) }
 
@@ -30,7 +31,8 @@ class PlaceFragment:Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        if(viewModel.isPlaceSaved()){
+
+        if(activity is MainActivity&&viewModel.isPlaceSaved()){
             val place=viewModel.getSavedPlace()
             val intent= Intent(context,WeatherActivity::class.java).apply {
                 putExtra("location_lng",place.location.lng)
