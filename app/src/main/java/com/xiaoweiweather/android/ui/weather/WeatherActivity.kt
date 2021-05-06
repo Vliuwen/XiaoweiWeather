@@ -15,10 +15,13 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.xiaoweiweather.android.R
 import com.xiaoweiweather.android.databinding.*
+import com.xiaoweiweather.android.logic.model.Hourlyitem
 import com.xiaoweiweather.android.logic.model.Weather
 import com.xiaoweiweather.android.logic.model.getSky
+import com.xiaoweiweather.android.ui.place.HourlyAdapter
 import com.xiaoweiweather.android.ui.place.PlaceFragment
 import java.text.SimpleDateFormat
 import java.util.*
@@ -81,7 +84,6 @@ class WeatherActivity : AppCompatActivity() {
 
             override fun onDrawerStateChanged(newState: Int) {}
 
-
         })
     }
 
@@ -94,13 +96,35 @@ class WeatherActivity : AppCompatActivity() {
             binding.layoutnow.placeName.text = viewModel.placeName
             val realtime = weather.realtime
             val daily = weather.daily
+            val hourly=weather.hourly
+
+            val hourlyitemList= ArrayList<Hourlyitem>()
+            for (i in 0 until hourly.skycon.size){
+                hourlyitemList.add(Hourlyitem(hourly.temperature[i].value,hourly.skycon[i]))
+            }
+
             // 填充now.xml布局中数据
+            val current=System.currentTimeMillis()
+            val simpleDateFormat=SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             val currentTempText = "${realtime.temperature.toInt()} ℃"
             binding.layoutnow.currentTemp.text = currentTempText
             binding.layoutnow.currentSky.text = getSky(realtime.skycon).info
             val currentPM25Text = "空气指数 ${realtime.airQuality.aqi.chn.toInt()}"
             binding.layoutnow.currentAQI.text = currentPM25Text
+            val tempText="上次更新时间："+simpleDateFormat.format(current)
+            binding.layoutnow.refreshTime.text=tempText
             binding.layoutnow.nowLayout.setBackgroundResource(getSky(realtime.skycon).bg)
+
+
+            // 填充hourly.xml布局中的数据
+
+            val layoutManager=LinearLayoutManager(this)
+            binding.layouthourly.hourlyLayout.layoutManager=layoutManager
+            val adapter=HourlyAdapter(hourlyitemList)
+            binding.layouthourly.hourlyLayout.adapter=adapter
+            layoutManager.orientation=LinearLayoutManager.HORIZONTAL
+
+
             // 填充forecast.xml布局中的数据
             binding.layoutforecast.forecastLayout.removeAllViews()
             val days = daily.skycon.size
@@ -129,4 +153,5 @@ class WeatherActivity : AppCompatActivity() {
             binding.layoutlifeindex.carWashingText.text = lifeIndex.carWashing[0].desc
             binding.weatherLayout.visibility = View.VISIBLE
         }
+
 }

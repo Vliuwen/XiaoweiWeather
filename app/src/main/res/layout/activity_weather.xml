@@ -27,6 +27,9 @@
                 <include
                     android:id="@+id/layoutnow"
                     layout="@layout/now" />
+                <include
+                    android:id="@+id/layouthourly"
+                    layout="@layout/hourly"/>
 
                 <include
                     android:id="@+id/layoutforecast"
@@ -51,8 +54,6 @@
         android:focusable="true"
         android:background="#87CEEB"
         android:id="@+id/frameLayout">
-
-
 
     </FrameLayout>
 

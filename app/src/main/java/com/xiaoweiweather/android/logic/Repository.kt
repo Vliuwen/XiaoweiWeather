@@ -40,18 +40,23 @@ object Repository {
                 val deferredDaily=async {
                     XiaoweiWeatherNetwork.getDailyWeather(lng, lat)
                 }
+                val deferredHourly=async {
+                    XiaoweiWeatherNetwork.getHourlyWeather(lng, lat)
+                }
                 val realtimeResponse=deferredRealtime.await()
                 val dailyResponse=deferredDaily.await()
+                val hourlyResponse=deferredHourly.await()
                 //响应状态都是ok，则将Realtime和Daily对象取出并封装到一个Weather对象中
-                if(realtimeResponse.status=="ok"&&dailyResponse.status=="ok"){
-                    val weather= Weather(realtimeResponse.result.realtime,dailyResponse.result.daily)
+                if(realtimeResponse.status=="ok"&&dailyResponse.status=="ok"&&hourlyResponse.status=="ok"){
+                    val weather= Weather(realtimeResponse.result.realtime,hourlyResponse.result.hourly,dailyResponse.result.daily)
                     Result.success(weather) //包装
                 }else{
                     //异常处理
                     Result.failure(
                             RuntimeException(
                                 "realtime response is ${realtimeResponse.status}"+
-                                "daily response is ${dailyResponse.status}"
+                                "daily response is ${dailyResponse.status}"+
+                                "hourly response is ${hourlyResponse.status}"
                             )
                     )
                 }
